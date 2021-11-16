@@ -231,21 +231,25 @@ QuickBooks.prototype.changeDataCapture = function(entities, since, callback) {
  *
  * @param  {string} filename - the name of the file
  * @param  {string} contentType - the mime type of the file
- * @param  {object} stream - ReadableStream of file contents
+ * @param  {object} buffer - Buffer of file contents
  * @param  {object} entityType - optional string name of the QBO entity the Attachable will be linked to (e.g. Invoice)
  * @param  {object} entityId - optional Id of the QBO entity the Attachable will be linked to
  * @param  {function} callback - callback which receives the newly created Attachable
  */
-QuickBooks.prototype.upload = function(filename, contentType, stream, entityType, entityId, callback) {
+
+const { Readable } = require('stream');
+
+QuickBooks.prototype.upload = function(filename, contentType, buffer, entityType, entityId, callback) {
   var that = this
   var opts = {
     url: '/upload',
     formData: {
       file_content_01: {
-        value: stream,
+        value: Readable.from(buffer),
         options: {
           filename: filename,
           contentType: contentType
+          knownLength: Buffer.byteLength(buffer)
         }
       }
     }
@@ -2317,6 +2321,7 @@ module.request = function(context, verb, options, entity, callback) {
   if ('production' !== process.env.NODE_ENV && context.debug) {
     debug(request)
   }
+  // console.log('QuickBooks request. Context:', context, 'Opts:', opts);
   request[verb].call(context, opts, function (err, res, body) {
     if ('production' !== process.env.NODE_ENV && context.debug) {
       console.log('invoking endpoint: ' + url)
