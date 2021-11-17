@@ -248,7 +248,7 @@ QuickBooks.prototype.upload = function(filename, contentType, buffer, entityType
         value: Readable.from(buffer),
         options: {
           filename: filename,
-          contentType: contentType
+          contentType: contentType,
           knownLength: Buffer.byteLength(buffer)
         }
       }
